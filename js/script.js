@@ -40,15 +40,7 @@ function initMobileMenu() {
  * Scroll Effects
  */
 function initScrollEffects() {
-    const header = document.querySelector('header');
-    
-    window.addEventListener('scroll', function() {
-        if (window.scrollY > 100) {
-            header.style.background = 'rgba(26, 39, 68, 0.98)';
-        } else {
-            header.style.background = 'var(--primary-dark)';
-        }
-    });
+    // Effect handled via CSS classes
 }
 
 /**
@@ -105,11 +97,11 @@ function initContactForm() {
             e.preventDefault();
             
             // Get form values
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
-            const phone = document.getElementById('phone').value;
-            const subject = document.getElementById('subject').value;
-            const message = document.getElementById('message').value;
+            const name = document.getElementById('name')?.value || '';
+            const email = document.getElementById('email')?.value || '';
+            const phone = document.getElementById('phone')?.value || '';
+            const subject = document.getElementById('subject')?.value || '';
+            const message = document.getElementById('message')?.value || '';
             
             // Basic validation
             if (!name || !email || !message) {
@@ -122,19 +114,32 @@ function initContactForm() {
                 showAlert('Please enter a valid email address.', 'error');
                 return;
             }
+            // Gmail-only validation
+            if (!email.endsWith('@gmail.com')) {
+                showAlert('Please enter a Gmail address (@gmail.com).', 'error');
+                return;
+            }
             
-            // Simulate form submission
+// Send via EmailJS - Replace with your keys
+emailjs.init('JlDRKScXBkuFxgNGE');
+            
             const submitBtn = contactForm.querySelector('.btn');
             const originalText = submitBtn.textContent;
             submitBtn.textContent = 'Sending...';
             submitBtn.disabled = true;
             
-            setTimeout(function() {
-                showAlert('Thank you for your inquiry! We will get back to you within 24 hours.', 'success');
-                contactForm.reset();
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
-            }, 1500);
+emailjs.sendForm('service_gobdkg4', 'template_bvrp4yu', contactForm)
+                .then(function(response) {
+                    showAlert('Thank you! Your message has been sent. We will reply within 24 hours.', 'success');
+                    contactForm.reset();
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }, function(error) {
+                    showAlert('Sorry, there was an error sending your message. Please try again.', 'error');
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                    console.error('EmailJS error:', error);
+                });
         });
     }
 }
@@ -245,7 +250,7 @@ setActiveNavLink();
 window.addEventListener('scroll', function() {
     const header = document.querySelector('header');
     if (header) {
-        if (window.scrollY > 50) {
+        if (window.scrollY > 100) {
             header.classList.add('scrolled');
         } else {
             header.classList.remove('scrolled');
